@@ -54,9 +54,9 @@ def send(command):
     pass
 
 
-def button1_handler(state):
+def button1_handler(state, disable=False):
     global light_on
-    if DEBUG:
+    if DEBUG and not disable:
         print 'Button 1', state
     if state:
         light_on = not light_on
@@ -113,7 +113,7 @@ def thread_func():
             api.command('led', False)
             light_on = False
         else:
-            button1_handler(True)
+            button1_handler(True, True)
 
 
 api.command('subscribe', 'button1', 'button2', 'motion')
