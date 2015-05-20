@@ -5,8 +5,8 @@ import struct
 import thread
 
 from flask import Flask, jsonify, request, abort
-
 from gcm import *
+from gcm.gcm import GCMException
 
 
 app = Flask('Android-Copernicus-Server')
@@ -17,7 +17,7 @@ DEBUG = True
 SERVER_IP = ''
 PORT = 20666
 ALARM_MODE = False
-DEVICES = []
+DEVICES = set()
 API_KEY = ""
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -77,7 +77,8 @@ def set_alarm():
     if mode != 'on' and mode != 'off':
         abort(400)
         return
-    ALARM_MODE = mode == 'on'
+    ALARM_MODE = (mode == 'on')
+    print ALARM_MODE
     return jsonify({'status': 'OK'})
 
 
@@ -95,7 +96,7 @@ def register_device():
     if "id" not in data:
         abort(400)
         return
-    DEVICES.append(data['id'])
+    DEVICES.add(data['id'])
     return jsonify({'status': 'OK'})
 
 
@@ -106,23 +107,22 @@ def thread_func():
         if DEBUG:
             print command.split(';')
         tab = command.split(';')
-
         if len(tab) < 4:
             continue
-
         floor = tab[0]
         room = tab[1]
         device = tab[2]
         operation = tab[3]
-
-        if device == 'motion' and operation != 'triggered' and ALARM_MODE:
+        if device == 'motion' and operation == 'triggered' and ALARM_MODE:
             for registration_id in DEVICES:
+                print registration_id
                 # noinspection PyBroadException
                 try:
                     gcm_connection = GCM(API_KEY)
                     data = {'status': 'alarm_triggered', 'floor': str(floor), 'room': str(room)}
                     gcm_connection.plaintext_request(registration_id=registration_id, data=data)
-                except Exception as e:
+                    print "Done"
+                except GCMException as e:
                     print e
 
 
