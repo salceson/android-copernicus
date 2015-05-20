@@ -3,4 +3,8 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="kitchen_btn">Kitchen toggle</string>
+    <string name="room_btn">Room toggle</string>
+    <string name="floor_btn">Turn off floor</string>
+    <string name="alarm">Alarm</string>
 </resources>

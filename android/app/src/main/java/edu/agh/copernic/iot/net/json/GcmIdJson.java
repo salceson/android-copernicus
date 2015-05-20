@@ -1,4 +1,4 @@
-package edu.agh.copernic.iot.net;
+package edu.agh.copernic.iot.net.json;
 
 public class GcmIdJson {
     private final String id;

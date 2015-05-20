@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
@@ -20,7 +19,6 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.i(TAG, "Got gcm msg");
-        Toast.makeText(context, "DZIALO", Toast.LENGTH_SHORT).show();
 
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
         String type = gcm.getMessageType(intent);
@@ -30,19 +28,18 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
             if (!bundle.isEmpty()) {
                 Log.i(FLOOR_TAG, bundle.getString(FLOOR_TAG));
                 Log.i(ROOM_TAG, bundle.getString(ROOM_TAG));
-                Log.i(TAG, bundle.toString());
+                NotificationCompat.Builder mBuilder =
+                        new NotificationCompat.Builder(context)
+                                .setSmallIcon(R.drawable.common_signin_btn_icon_light)
+                                .setContentTitle("ALARM!")
+                                .setContentText("Some is in the " + bundle.get(ROOM_TAG) + " on the floor no " + bundle.getString(FLOOR_TAG));
+                NotificationManager mNotificationManager =
+                        (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+// mId allows you to update the notification later on.
+                mNotificationManager.notify(0, mBuilder.build());
             }
         }
 
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.common_signin_btn_icon_light)
-                        .setContentTitle("My notification")
-                        .setContentText("Hello World!");
 
-        NotificationManager mNotificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-// mId allows you to update the notification later on.
-        mNotificationManager.notify(0, mBuilder.build());
     }
 }

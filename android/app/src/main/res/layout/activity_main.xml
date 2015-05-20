@@ -5,7 +5,47 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
 
-    <TextView android:text="@string/hello_world" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/kitchen_btn"
+        android:text="@string/kitchen_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/room_btn"
+        android:text="@string/room_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/kitchen_btn"
+        android:layout_alignRight="@+id/kitchen_btn"
+        android:layout_alignEnd="@+id/kitchen_btn"
+        android:layout_alignLeft="@+id/kitchen_btn"
+        android:layout_alignStart="@+id/kitchen_btn" />
+
+    <Button
+        android:id="@+id/floor_btn"
+        android:text="@string/floor_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/room_btn"
+        android:layout_alignRight="@+id/room_btn"
+        android:layout_alignEnd="@+id/room_btn"
+        android:layout_alignLeft="@+id/room_btn"
+        android:layout_alignStart="@+id/room_btn" />
+
+    <Switch
+        android:id="@+id/alarm_switch"
+        android:text="@string/alarm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/floor_btn"
+        android:layout_alignRight="@+id/floor_btn"
+        android:layout_alignEnd="@+id/floor_btn"
+        android:layout_alignLeft="@+id/floor_btn"
+        android:layout_alignStart="@+id/floor_btn"
+        android:layout_margin="16dp"
+        />
 
 </RelativeLayout>

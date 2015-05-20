@@ -8,25 +8,29 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.TextView;
+import android.widget.Button;
+import android.widget.Switch;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import edu.agh.copernic.iot.net.GcmIdJson;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import edu.agh.copernic.iot.net.json.AlarmRequestJson;
+import edu.agh.copernic.iot.net.json.AlarmResponseJson;
+import edu.agh.copernic.iot.net.json.GcmIdJson;
+import edu.agh.copernic.iot.net.json.LightsRequestJson;
+import edu.agh.copernic.iot.util.Toasts;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import rx.android.schedulers.AndroidSchedulers;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String EXTRA_MESSAGE = "message";
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
@@ -40,20 +44,32 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Tag used on log messages.
      */
-    static final String TAG = "GCMDemo";
+    private static final String TAG = "MainActivity";
 
-    TextView mDisplay;
-    GoogleCloudMessaging gcm;
-    AtomicInteger msgId = new AtomicInteger();
-    SharedPreferences prefs;
-    Context context;
+    private GoogleCloudMessaging gcm;
+    private Context context;
 
-    String regid;
+    private String regid;
+
+
+    @InjectView(R.id.kitchen_btn)
+    Button kitchenBtn;
+
+    @InjectView(R.id.room_btn)
+    Button roomBtn;
+
+    @InjectView(R.id.floor_btn)
+    Button floorBtn;
+
+    @InjectView(R.id.alarm_switch)
+    Switch alarmSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ButterKnife.inject(this);
 
         context = getApplicationContext();
 
@@ -68,28 +84,72 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "No valid Google Play Services APK found.");
         }
 
-    }
+        kitchenBtn.setOnClickListener(v -> CopernicApplication
+                .getContract()
+                .sendLightsOperation(LightsRequestJson
+                        .create(LightsRequestJson.Operation.TOGGLE, LightsRequestJson.Room.KITCHEN))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        response -> Toasts.show(context, "Toggled lights in the kitchen"),
+                        error -> Toasts.show(context, "Couldn't toggle lights. Try again.")));
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+        roomBtn.setOnClickListener(v -> CopernicApplication
+                .getContract()
+                .sendLightsOperation(LightsRequestJson
+                        .create(LightsRequestJson.Operation.TOGGLE, LightsRequestJson.Room.ROOM))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        response -> Toasts.show(context, "Toggled lights in the room"),
+                        error -> Toasts.show(context, "Couldn't toggle lights. Try again.")));
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        floorBtn.setOnClickListener(v -> CopernicApplication
+                .getContract()
+                .sendLightsOperation(LightsRequestJson
+                        .create(LightsRequestJson.Operation.OFF, LightsRequestJson.Room.ALL))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        response -> Toasts.show(context, "Turned lights off on the whole floor"),
+                        error -> Toasts.show(context, "Couldn't turn off lights. Try again.")));
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+        alarmSwitch.setEnabled(false);
+        Toasts.show(context, "I need to check if alarm is turned on. Wait a sec.");
+        CopernicApplication.getContract()
+                .getAlarmStatus()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        response -> {
+                            if (response.getMode().equals(AlarmResponseJson.Mode.ON.toString())) {
+                                alarmSwitch.setChecked(true);
+                            } else {
+                                alarmSwitch.setChecked(false);
+                            }
+                            alarmSwitch.setEnabled(true);
+                            Toasts.show(context, "Alarms is " + response.getMode());
+                        },
+                        error -> {
+                            Toasts.show(context, "Couldn't check if alarm is turned on");
+                            alarmSwitch.setChecked(false);
+                            alarmSwitch.setEnabled(true);
+                        }
+                );
 
-        return super.onOptionsItemSelected(item);
+        alarmSwitch.setOnClickListener(v -> {
+            String mode;
+            if (alarmSwitch.isChecked()) {
+                mode = AlarmResponseJson.Mode.ON.toString();
+            } else {
+                mode = AlarmResponseJson.Mode.OFF.toString();
+            }
+            CopernicApplication.getContract().setAlarmState(
+                    AlarmRequestJson.create(mode))
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            response -> Toasts.show(context, "Alarm turned on"),
+                            error -> {
+                                Toasts.show(context, "Couldn't turn the alarm " + mode);
+                                alarmSwitch.setChecked(!alarmSwitch.isChecked());
+                            });
+        });
     }
 
     /**
@@ -118,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
      * If result is empty, the app needs to register.
      *
      * @return registration ID, or empty string if there is no existing
-     *         registration ID.
+     * registration ID.
      */
     private String getRegistrationId(Context context) {
         final SharedPreferences prefs = getGCMPreferences(context);
@@ -214,6 +274,7 @@ public class MainActivity extends AppCompatActivity {
      * or CCS to send messages to your app. Not needed for this demo since the
      * device sends upstream messages to a server that echoes back the message
      * using the 'from' address in the message.
+     *
      * @param regid
      */
     private void sendRegistrationIdToBackend(String regid) {
@@ -228,12 +289,13 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, e.getMessage());
         }
     }
+
     /**
      * Stores the registration ID and app versionCode in the application's
      * {@code SharedPreferences}.
      *
      * @param context application's context.
-     * @param regId registration ID
+     * @param regId   registration ID
      */
     private void storeRegistrationId(Context context, String regId) {
         final SharedPreferences prefs = getGCMPreferences(context);

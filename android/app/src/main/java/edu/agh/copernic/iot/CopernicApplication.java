@@ -1,7 +1,6 @@
 package edu.agh.copernic.iot;
 
 import android.app.Application;
-import android.util.Log;
 
 import edu.agh.copernic.iot.net.IoTContract;
 import retrofit.RestAdapter;
@@ -22,7 +21,6 @@ public class CopernicApplication extends Application {
                 .setEndpoint("http://10.22.112.219:20666")
                 .build();
 
-        Log.d("dupa", "dupa");
         contract = restAdapter.create(IoTContract.class);
     }
 
