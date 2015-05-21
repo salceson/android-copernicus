@@ -48,4 +48,42 @@
         android:layout_margin="16dp"
         />
 
+    <TextView
+        android:id="@+id/debug_text_view"
+        android:text="DEBUG MODE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/alarm_switch"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/gcm_send_btn"
+        android:text="@string/server_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/debug_text_view"
+        android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:id="@+id/endpoint_edit_text"
+        android:hint="Endpoint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/gcm_send_btn"
+        android:layout_alignLeft="@+id/gcm_send_btn"
+        android:layout_alignStart="@+id/gcm_send_btn"
+        android:layout_alignRight="@+id/gcm_send_btn"
+        android:layout_alignEnd="@+id/gcm_send_btn" />
+
+    <Button
+        android:id="@+id/endpoint_btn"
+        android:text="Set endpoint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/endpoint_edit_text"
+        android:layout_alignRight="@+id/floor_btn"
+        android:layout_alignEnd="@+id/floor_btn"
+        android:layout_alignLeft="@+id/floor_btn"
+        android:layout_alignStart="@+id/floor_btn" />
+
 </RelativeLayout>

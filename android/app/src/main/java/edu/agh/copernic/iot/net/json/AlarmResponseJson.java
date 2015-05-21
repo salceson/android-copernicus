@@ -25,5 +25,5 @@ public class AlarmResponseJson {
         }
     }
 
-    private final String mode;
+    private final String alarm;
 }

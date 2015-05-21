@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Switch;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -24,8 +25,6 @@ import edu.agh.copernic.iot.net.json.AlarmResponseJson;
 import edu.agh.copernic.iot.net.json.GcmIdJson;
 import edu.agh.copernic.iot.net.json.LightsRequestJson;
 import edu.agh.copernic.iot.util.Toasts;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 import rx.android.schedulers.AndroidSchedulers;
 
 
@@ -61,8 +60,17 @@ public class MainActivity extends AppCompatActivity {
     @InjectView(R.id.floor_btn)
     Button floorBtn;
 
+    @InjectView(R.id.gcm_send_btn)
+    Button gcmBtn;
+
     @InjectView(R.id.alarm_switch)
     Switch alarmSwitch;
+
+    @InjectView(R.id.endpoint_edit_text)
+    EditText endpointEditText;
+
+    @InjectView(R.id.endpoint_btn)
+    Button enpointBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,47 +92,49 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "No valid Google Play Services APK found.");
         }
 
-        kitchenBtn.setOnClickListener(v -> CopernicApplication
+        kitchenBtn.setOnClickListener(v -> CopernicApplication.getInstance()
                 .getContract()
                 .sendLightsOperation(LightsRequestJson
-                        .create(LightsRequestJson.Operation.TOGGLE, LightsRequestJson.Room.KITCHEN))
+                        .create(LightsRequestJson.Room.KITCHEN, LightsRequestJson.Operation.TOGGLE))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         response -> Toasts.show(context, "Toggled lights in the kitchen"),
                         error -> Toasts.show(context, "Couldn't toggle lights. Try again.")));
 
-        roomBtn.setOnClickListener(v -> CopernicApplication
+        roomBtn.setOnClickListener(v -> CopernicApplication.getInstance()
                 .getContract()
                 .sendLightsOperation(LightsRequestJson
-                        .create(LightsRequestJson.Operation.TOGGLE, LightsRequestJson.Room.ROOM))
+                        .create(LightsRequestJson.Room.ROOM, LightsRequestJson.Operation.TOGGLE))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        response -> Toasts.show(context, "Toggled lights in the room"),
+                        response -> Toasts.show(context, "Toggled lights in the corridor"),
                         error -> Toasts.show(context, "Couldn't toggle lights. Try again.")));
 
-        floorBtn.setOnClickListener(v -> CopernicApplication
+        floorBtn.setOnClickListener(v -> CopernicApplication.getInstance()
                 .getContract()
                 .sendLightsOperation(LightsRequestJson
-                        .create(LightsRequestJson.Operation.OFF, LightsRequestJson.Room.ALL))
+                        .create(LightsRequestJson.Room.ALL, LightsRequestJson.Operation.OFF))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         response -> Toasts.show(context, "Turned lights off on the whole floor"),
                         error -> Toasts.show(context, "Couldn't turn off lights. Try again.")));
 
+        gcmBtn.setOnClickListener(v -> sendRegistrationIdToBackend(regid));
+
         alarmSwitch.setEnabled(false);
         Toasts.show(context, "I need to check if alarm is turned on. Wait a sec.");
-        CopernicApplication.getContract()
+        CopernicApplication.getInstance().getContract()
                 .getAlarmStatus()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         response -> {
-                            if (response.getMode().equals(AlarmResponseJson.Mode.ON.toString())) {
+                            if (response.getAlarm().equals(AlarmResponseJson.Mode.ON.toString())) {
                                 alarmSwitch.setChecked(true);
                             } else {
                                 alarmSwitch.setChecked(false);
                             }
                             alarmSwitch.setEnabled(true);
-                            Toasts.show(context, "Alarms is " + response.getMode());
+                            Toasts.show(context, "Alarms is " + response.getAlarm());
                         },
                         error -> {
                             Toasts.show(context, "Couldn't check if alarm is turned on");
@@ -140,16 +150,22 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 mode = AlarmResponseJson.Mode.OFF.toString();
             }
-            CopernicApplication.getContract().setAlarmState(
+            CopernicApplication.getInstance().getContract().setAlarmState(
                     AlarmRequestJson.create(mode))
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
-                            response -> Toasts.show(context, "Alarm turned on"),
+                            response -> Toasts.show(context, "Alarm turned " + mode),
                             error -> {
                                 Toasts.show(context, "Couldn't turn the alarm " + mode);
                                 alarmSwitch.setChecked(!alarmSwitch.isChecked());
                             });
         });
+
+        enpointBtn.setOnClickListener(v -> {
+            String value = endpointEditText.getText().toString();
+            CopernicApplication.getInstance().setEndpoint(value);
+        });
+
     }
 
     /**
@@ -279,15 +295,13 @@ public class MainActivity extends AppCompatActivity {
      */
     private void sendRegistrationIdToBackend(String regid) {
         // Your implementation here.
-        Response response = null;
-        try {
-            response = CopernicApplication.getContract().sendGCMI(new GcmIdJson(regid));
-            if (response.getStatus() == 200) {
-                Log.i(TAG, "Sent id");
-            }
-        } catch (RetrofitError e) {
-            Log.i(TAG, e.getMessage());
-        }
+        CopernicApplication.getInstance().getContract().sendGCMI(new GcmIdJson(regid))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        response -> Log.i(TAG, regid + " has been sent as GCM"),
+                        error -> Log.w(TAG, error.getMessage())
+                );
+
     }
 
     /**

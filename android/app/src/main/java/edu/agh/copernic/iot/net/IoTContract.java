@@ -12,7 +12,7 @@ import rx.Observable;
 
 public interface IoTContract {
     @POST("/device/")
-    Response sendGCMI(@Body GcmIdJson body);
+    Observable<Response> sendGCMI(@Body GcmIdJson body);
 
     @POST("/lights/")
     Observable<Response> sendLightsOperation(@Body LightsRequestJson body);

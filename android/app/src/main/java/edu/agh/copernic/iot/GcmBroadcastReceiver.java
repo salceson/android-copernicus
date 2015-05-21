@@ -10,6 +10,8 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+import edu.agh.copernic.iot.util.Toasts;
+
 public class GcmBroadcastReceiver extends BroadcastReceiver {
     public static final String TAG = "GcmReceiver";
 
@@ -32,11 +34,12 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
                         new NotificationCompat.Builder(context)
                                 .setSmallIcon(R.drawable.common_signin_btn_icon_light)
                                 .setContentTitle("ALARM!")
-                                .setContentText("Some is in the " + bundle.get(ROOM_TAG) + " on the floor no " + bundle.getString(FLOOR_TAG));
+                                .setContentText("Someone is in the " + bundle.get(ROOM_TAG) + " on the floor no " + bundle.getString(FLOOR_TAG));
                 NotificationManager mNotificationManager =
                         (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 // mId allows you to update the notification later on.
                 mNotificationManager.notify(0, mBuilder.build());
+                Toasts.show(context, "ALARM!!!!");
             }
         }
 

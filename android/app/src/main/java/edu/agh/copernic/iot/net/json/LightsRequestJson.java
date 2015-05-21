@@ -7,7 +7,7 @@ import lombok.Value;
 public class LightsRequestJson {
     public interface Room {
         String KITCHEN = "kitchen";
-        String ROOM = "room";
+        String ROOM = "corridor";
         String ALL = "*";
     }
 
