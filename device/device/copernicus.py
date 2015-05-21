@@ -265,7 +265,8 @@ class Copernicus:
         Waits for incoming byte and fires appropriate event.
         """
         char = self._connection.read(1)
-        self.handle(char)
+        if len(char) > 0:
+            self.handle(char)
 
     def load_commands(self, commands):
         """

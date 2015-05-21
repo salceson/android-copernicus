@@ -11,10 +11,11 @@ ROOM = 'kitchen'  # kitchen|corridor
 DELAY = 5  # in seconds
 DEBUG = True
 
+from serial import Serial
+
 if VIRTUAL_COPERNICUS:
     # ----- BEGIN INITIALIZATION -----
     import os
-    from serial import Serial
 
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     SERIAL_PATH = os.path.join(BASE_DIR, 'dev', 'ttyS0')
