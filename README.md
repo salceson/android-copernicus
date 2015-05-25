@@ -47,6 +47,24 @@ All of the parts are cooperate with each other using 3 different ways.
 The devices and the server are communicating using UDP sockets (they are in the same
  multicast group - in our project we used group `234.6.6.6` and port `3666`).
  
+#### Message format - lights changing
+
+```
+<floor>;<room>;lamp;<mode>
+```
+
+In our project floor can be only `1` or `*` (`*` means all floors) and room can be `kitchen`
+ or `corridor` or `*` (`*` means all floors). Mode is either `on`, `off` or `toggle`.
+
+#### Message format - motion triggering
+
+```
+<floor>;<room>;motion;triggered
+```
+
+In our project floor can be only `1` and room can be `kitchen` or `corridor`. Note that here the
+ message comes exactly from one source, hence the `*` is not permitted in floor or room fields.
+
 ### REST and GCM
 
 The server and Android app are communicating using REST service on the server and GCM. Android app uses
