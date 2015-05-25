@@ -55,7 +55,10 @@ The server and Android app are communicating using REST service on the server an
  
 #### GCM Architecture
 
-<OBRAZEK>
+![GCM Architecture](gcm.png)
+
+The server (in the picture shown as the 3rd-party app server) sends the message to the Google servers
+ (with the recipient set to the correct phone). It is then passed by them to the proper device.
 
 ### REST API
 
