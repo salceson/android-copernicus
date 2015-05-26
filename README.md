@@ -6,6 +6,17 @@ Android &amp; Copernicus Integration (IoT AGH)
 
 Controlling the lamps in a smart house.
 
+## Project goals
+
+The goal of the project was to integrate Copenicus-based smart house system with an Android application
+ that would allow sending commands to the system and receive incoming messages. Our smart house is equipped
+  with a set of devices having a lamp output with on/off switch and a motion sensor. Each device is assigned
+   to a single room and all of them have a second button that allows disabling all lamps on current floor.
+
+The Android application is a remote interface for the smart house system. It allows switching lamps on and
+ off but also has a feature of an alarm. Once the alarm is switched on, the user will get a notification sent
+  over Google Cloud Messaging each time the system detects motion in any of rooms.
+
 ## Architecture
 
 There are 3 parts of this project:
