@@ -176,4 +176,5 @@ Where:
 * Android Development Kit (ADK)
 * Python GCM
 * Flask
-* Copernicus API
+* [Copernicus API](https://github.com/gronostajo/copernicus-api)
+* [vCopernicus](https://github.com/mkwm/vcopernicus)
